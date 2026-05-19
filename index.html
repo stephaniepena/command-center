@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Command Center</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --cream: #faf6f0; --cream-2: #f3ede3; --cream-3: #e8dfd2;
+  --ink: #2c2118; --ink-2: #5c4e3f; --ink-3: #9e8e7e;
+  --rule: #ddd4c4; --terra: #b85c38; --terra-light: #f5e8e2; --terra-border: #e8c4b4;
+  --amber: #c47d2a; --amber-light: #faf0dc; --amber-border: #e8d4a4;
+  --rose: #a85870; --rose-light: #f7edf0; --rose-border: #e8c4cc;
+  --sage: #5a7a5a;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Jost', sans-serif; background: var(--cream); color: var(--ink); min-height: 100vh; }
+.header { padding: 2rem 2rem 1.25rem; background: var(--ink); display: flex; align-items: flex-end; justify-content: space-between; flex-wrap: wrap; gap: 1rem; }
+.header-left h1 { font-family: 'Playfair Display', serif; font-size: 30px; font-weight: 400; color: var(--cream); line-height: 1.1; }
+.header-left p { font-size: 12px; color: var(--ink-3); margin-top: 4px; font-weight: 300; letter-spacing: 0.08em; text-transform: uppercase; }
+.stats { display: flex; gap: 2rem; flex-wrap: wrap; }
+.stat { text-align: right; }
+.stat-num { font-family: 'Playfair Display', serif; font-size: 26px; color: var(--cream); line-height: 1; }
+.stat-label { font-size: 10px; color: var(--ink-3); margin-top: 3px; text-transform: uppercase; letter-spacing: 0.1em; }
+.nav { display: flex; padding: 0 2rem; border-bottom: 1px solid var(--rule); background: var(--cream-2); overflow-x: auto; }
+.nav-btn { font-family: 'Jost', sans-serif; font-size: 12px; color: var(--ink-3); background: none; border: none; border-bottom: 2px solid transparent; padding: 13px 16px; cursor: pointer; white-space: nowrap; transition: all 0.15s; letter-spacing: 0.06em; text-transform: uppercase; }
+.nav-btn:hover { color: var(--ink); }
+.nav-btn.active { color: var(--terra); border-bottom-color: var(--terra); font-weight: 500; }
+.content { padding: 1.75rem 2rem; max-width: 860px; }
+.section-rule { font-size: 10px; text-transform: uppercase; letter-spacing: 0.12em; color: var(--ink-3); font-weight: 500; margin: 1.75rem 0 10px; padding-bottom: 7px; border-bottom: 1px solid var(--rule); display: flex; align-items: center; justify-content: space-between; }
+.section-rule:first-child { margin-top: 0; }
+.section-count { background: var(--cream-3); border-radius: 20px; padding: 1px 8px; font-size: 10px; color: var(--ink-3); letter-spacing: 0; text-transform: none; }
+.task-card { background: #fff; border: 1px solid var(--rule); border-radius: 6px; padding: 11px 14px; margin-bottom: 6px; display: flex; align-items: flex-start; gap: 11px; transition: box-shadow 0.15s; }
+.task-card:hover { box-shadow: 0 2px 8px rgba(44,33,24,0.06); border-color: var(--ink-3); }
+.task-num { font-size: 10px; color: var(--ink-3); font-weight: 400; letter-spacing: 0.03em; flex-shrink: 0; margin-top: 3px; min-width: 28px; }
+.task-body { flex: 1; min-width: 0; }
+.task-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
+.task-title { font-size: 14px; color: var(--ink); line-height: 1.45; flex: 1; font-weight: 400; }
+.badges { display: flex; gap: 4px; flex-wrap: wrap; flex-shrink: 0; }
+.badge { font-size: 10px; padding: 2px 8px; border-radius: 3px; white-space: nowrap; font-weight: 400; letter-spacing: 0.04em; text-transform: uppercase; }
+.badge-date { background: var(--cream-2); color: var(--ink-3); border: 1px solid var(--rule); }
+.badge-urgent { background: var(--terra-light); color: var(--terra); border: 1px solid var(--terra-border); }
+.badge-work { background: var(--amber-light); color: var(--amber); border: 1px solid var(--amber-border); }
+.badge-personal { background: var(--rose-light); color: var(--rose); border: 1px solid var(--rose-border); }
+.task-note { font-size: 12px; color: var(--ink-3); margin-top: 4px; line-height: 1.5; font-weight: 300; font-style: italic; }
+.empty { font-size: 13px; color: var(--ink-3); padding: 1.5rem 0; text-align: center; font-style: italic; font-family: 'Playfair Display', serif; }
+.project-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 1rem; }
+.project-card { background: #fff; border: 1px solid var(--rule); border-radius: 8px; overflow: hidden; cursor: pointer; transition: box-shadow 0.15s, transform 0.15s; }
+.project-card:hover { box-shadow: 0 4px 18px rgba(44,33,24,0.1); transform: translateY(-1px); }
+.project-card-header { padding: 14px 16px 10px; border-bottom: 1px solid var(--rule); display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
+.project-name { font-family: 'Playfair Display', serif; font-size: 15px; color: var(--ink); line-height: 1.3; font-weight: 400; }
+.project-date { font-size: 11px; color: var(--ink-3); margin-top: 3px; }
+.project-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; margin-top: 4px; }
+.project-tasks-preview { padding: 10px 16px 12px; }
+.project-task-row { display: flex; align-items: flex-start; gap: 7px; padding: 3px 0; font-size: 11px; color: var(--ink-2); line-height: 1.4; }
+.mini-dot { width: 4px; height: 4px; border-radius: 50%; background: var(--rule); flex-shrink: 0; margin-top: 5px; }
+.mini-dot.urgent { background: var(--terra); }
+.project-more { font-size: 11px; color: var(--ink-3); margin-top: 6px; padding-top: 6px; border-top: 1px solid var(--cream-2); }
+.project-progress { display: flex; align-items: center; gap: 8px; padding: 8px 16px; background: var(--cream-2); font-size: 11px; color: var(--ink-3); }
+.progress-bar { flex: 1; height: 2px; background: var(--rule); border-radius: 2px; overflow: hidden; }
+.progress-fill { height: 100%; background: var(--terra); border-radius: 2px; }
+.back-btn { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: var(--ink-3); background: none; border: none; cursor: pointer; padding: 0; margin-bottom: 1.25rem; font-family: 'Jost', sans-serif; letter-spacing: 0.04em; text-transform: uppercase; }
+.back-btn:hover { color: var(--terra); }
+.detail-title { font-family: 'Playfair Display', serif; font-size: 26px; color: var(--ink); font-weight: 400; }
+.detail-meta { font-size: 12px; color: var(--ink-3); margin-top: 4px; margin-bottom: 1.25rem; }
+.priority-section { margin-bottom: 1.75rem; }
+.priority-header { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; padding: 8px 12px; border-radius: 5px; font-size: 10px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.1em; }
+.ph-urgent { background: var(--terra-light); color: var(--terra); border-left: 3px solid var(--terra); }
+.ph-soon { background: var(--amber-light); color: var(--amber); border-left: 3px solid var(--amber); }
+.ph-later { background: var(--cream-2); color: var(--ink-3); border-left: 3px solid var(--rule); }
+.pill-count { background: rgba(0,0,0,0.08); border-radius: 20px; padding: 1px 7px; font-size: 10px; }
+@media (max-width: 600px) {
+  .header { padding: 1.25rem 1rem 1rem; }
+  .nav { padding: 0 1rem; }
+  .content { padding: 1.25rem 1rem; }
+  .project-grid { grid-template-columns: 1fr; }
+  .stats { gap: 1.25rem; }
+  .header-left h1 { font-size: 24px; }
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-left">
+    <h1>Command Center</h1>
+    <p>Your life, organized</p>
+  </div>
+  <div class="stats">
+    <div class="stat"><div class="stat-num" id="stat-soon">—</div><div class="stat-label">Coming up</div></div>
+    <div class="stat"><div class="stat-num" id="stat-total">—</div><div class="stat-label">Total open</div></div>
+  </div>
+</div>
+
+<div class="nav">
+  <button class="nav-btn active" onclick="setView('schedule',this)">Schedule</button>
+  <button class="nav-btn" onclick="setView('projects',this)">Projects</button>
+  <button class="nav-btn" onclick="setView('priority',this)">Priority</button>
+</div>
+
+<div class="content">
+  <div id="view-schedule"></div>
+  <div id="view-projects" style="display:none"></div>
+  <div id="view-priority" style="display:none"></div>
+</div>
+
+<script>
+const PROJECTS = [
+  {id:'pittsburgh',name:'Pittsburgh / Resilient Together',date:'Debrief & wrap-up',color:'#b85c38'},
+  {id:'housing',name:'Housing Innovation Summit',date:'May 20–22 · Charlotte',color:'#2a5c8a'},
+  {id:'boston',name:'Boston / June 1 Retreat',date:'May 30 – June 4',color:'#4a7a3a'},
+  {id:'paris',name:'Paris Trip',date:'June 6–11',color:'#c47d2a'},
+  {id:'photos',name:'Family Pictures',date:'Saturday, May 23',color:'#a85870'},
+  {id:'kids',name:'Kids & Family',date:'Ongoing',color:'#7a5ab8'},
+  {id:'admin',name:'Personal Admin',date:'Ongoing',color:'#5a6a5a'},
+  {id:'chicago',name:'Chicago Trip',date:'June 15–18',color:'#2a7a5a'},
+  {id:'cruise',name:'Miami Cruise',date:'Late July',color:'#2a6a8a'},
+];
+
+const TASKS = [
+  {id:17,title:'Schedule Pittsburgh debrief with facilitators',project:'pittsburgh',cat:'work',urgency:'soon',date:'This week'},
+  {id:18,title:'Schedule Pittsburgh debrief with funders',project:'pittsburgh',cat:'work',urgency:'soon',date:'This week'},
+  {id:51,title:'Update Migration Network contract to reflect Chief Devon ticket cost',project:'pittsburgh',cat:'work',urgency:'soon',date:'This week',note:'Ticket already purchased — contract needs to be amended to reflect actual spend'},
+  {id:12,title:'Review Building for the Future payment timelines',project:'admin',cat:'work',urgency:'soon',date:'This week',note:'Rush any payments that need to fit current fiscal year'},
+  {id:13,title:'Email sponsored project summaries + contact info to teams',project:'admin',cat:'work',urgency:'soon',date:'This week',note:'All other Lincoln-sponsored projects'},
+  {id:50,title:'Schedule 1:1 with Swati (Equity & Opportunity team)',project:'admin',cat:'work',urgency:'soon',date:'This week',note:'She is open to it — just needs a time on the calendar'},
+  {id:52,title:'Send Libertad the publications request form',project:'admin',cat:'work',urgency:'soon',date:'Follow-up from Detroit/APA trip'},
+  {id:53,title:'Brief Libertad on TFN',project:'admin',cat:'work',urgency:'soon',date:'Follow-up from Detroit/APA trip'},
+  {id:54,title:'Follow up with Libertad on external partners + branding + logos',project:'admin',cat:'work',urgency:'soon',date:'Follow-up from Detroit/APA trip',note:'Meeting on a Monday — naming, logos, branding discussion'},
+  {id:58,title:'Set up autopay for remaining bills',project:'admin',cat:'personal',urgency:'soon',date:'This week',note:'Review your bill spreadsheet — set fixed bills to full autopay, credit cards to at least minimum payment to protect credit and avoid late fees'},
+  {id:59,title:'Find a new therapist',project:'admin',cat:'personal',urgency:'soon',date:'When you have a moment',note:'Check insurance coverage first to narrow the list'},
+  {id:62,title:'Reschedule 1:1 with Lorelei',project:'admin',cat:'work',urgency:'soon',date:'This week'},
+  {id:63,title:'Reimburse Francesca Koe for NAF flight',project:'admin',cat:'work',urgency:'soon',date:'This week',note:'Check her preferred reimbursement method — submit through proper channels'},
+  {id:19,title:'Kids + Rafa haircuts before family pictures',project:'photos',cat:'personal',urgency:'soon',date:'Before Sat 5/23'},
+  {id:20,title:'Plan and shop for family picture outfits',project:'photos',cat:'personal',urgency:'soon',date:'Before Sat 5/23',note:'Coordinate everyone — probably requires a shopping trip'},
+  {id:21,title:'Find headshot outfit: professional but not stuffy',project:'photos',cat:'personal',urgency:'soon',date:'Before Sat 5/23',note:'Headshots same day as family pics on 5/23'},
+  {id:61,title:'Dry clean black blazer before Paris',project:'paris',cat:'personal',urgency:'soon',date:'Before May 26',note:"Drop off this week — you leave for Boston May 30 and Paris June 6"},
+  {id:22,title:'Buy + wrap gift for May 30 birthday party',project:'kids',cat:'personal',urgency:'soon',date:'Before Sat 5/30'},
+  {id:23,title:'Make card for May 30 birthday party',project:'kids',cat:'personal',urgency:'soon',date:'Before Sat 5/30'},
+  {id:24,title:'Pack for Boston: bed-wetting prep for Amari',project:'boston',cat:'personal',urgency:'soon',date:'Before Sat 5/30',note:"Waterproof mattress pad, extra PJs — also needed at friend's house later"},
+  {id:25,title:'Gather and confirm Boston museum passes',project:'boston',cat:'personal',urgency:'soon',date:'Before Sat 5/30',note:'Already have them — just organize and verify which ones'},
+  {id:26,title:'Organize June 1 retreat: catering',project:'boston',cat:'work',urgency:'soon',date:'Before June 1'},
+  {id:27,title:'Organize June 1 retreat: pre-reads',project:'boston',cat:'work',urgency:'soon',date:'Before June 1'},
+  {id:28,title:'Organize June 1 retreat: remaining logistics',project:'boston',cat:'work',urgency:'soon',date:'Before June 1',note:'Agenda is with Solomon — follow his lead, then fill in logistics'},
+  {id:31,title:"Reach out to the Hive about Thea's surgery gift",project:'admin',cat:'personal',urgency:'soon',date:'~June 1 week',note:'Thea has surgery that week — start coordinating group gift'},
+  {id:29,title:"Decide: bring Amari to Devorah's gravesite in Cambridge?",project:'boston',cat:'personal',urgency:'soon',date:'~June 1–4',note:'Her birthday falls during the trip — option to paint rocks + visit, or skip the death conversation for now'},
+  {id:30,title:"Paint rocks with Amari for Devorah's gravesite",project:'boston',cat:'personal',urgency:'soon',date:'~June 1–4',note:'Contingent on decision above'},
+  {id:46,title:'Check your passport expiration date against Paris travel (June 6–11)',project:'paris',cat:'personal',urgency:'soon',date:'ASAP',note:'France requires validity for duration of stay; some countries want 3–6 months beyond travel dates. Confirm before you do anything else.'},
+  {id:32,title:'Paris: request early check-in at hotel (overnight flight)',project:'paris',cat:'work',urgency:'soon',date:'ASAP',note:'Hotel is far from meeting office — early check-in is critical'},
+  {id:44,title:'Verify Verizon TravelPass is active on your line before Paris',project:'paris',cat:'personal',urgency:'soon',date:'Before June 6',note:"Now $12/day internationally. Check My Verizon app — if not on your line, ask your stepdad to add it or grant you Account Manager access"},
+  {id:33,title:'Paris: reorganize hotel vs. new meeting office location',project:'paris',cat:'work',urgency:'soon',date:'Before June 6'},
+  {id:34,title:'Paris: overlay new agenda with team logistics',project:'paris',cat:'work',urgency:'soon',date:'Before June 6'},
+  {id:35,title:'Paris: prepare bios + session materials',project:'paris',cat:'work',urgency:'soon',date:'Before June 6'},
+  {id:36,title:'Paris: organize team + larger group dinners',project:'paris',cat:'work',urgency:'soon',date:'Before June 6',note:'Some Lincoln team only — others with broader group'},
+  {id:37,title:"Plan something for wedding anniversary (you'll be in Paris)",project:'paris',cat:'personal',urgency:'soon',date:'~June 6–11',note:'Acknowledge it for Rafa — plan a before/after celebration or send something from Paris'},
+  {id:38,title:'Look up Discovery Place Lego exhibit + parking/traffic',project:'kids',cat:'personal',urgency:'later',date:'June 12',note:'Never been — plan logistics in advance'},
+  {id:39,title:'Prep for Chicago trip',project:'chicago',cat:'work',urgency:'later',date:'June 15–18',note:"Solomon's birthday is June 16 while you're there"},
+  {id:42,title:"Plan Father's Day",project:'admin',cat:'personal',urgency:'later',date:'~June 15 weekend',note:"Nothing planned — you'll be in Chicago, so organize something for before or after"},
+  {id:40,title:"Reschedule Amari's ENT appointment",project:'admin',cat:'personal',urgency:'later',date:'June 16 → TBD',note:"He'll be with your mom for summer — she'll prefer you take him; move to a date you can attend"},
+  {id:41,title:'Order porch goose graduation outfit',project:'admin',cat:'personal',urgency:'later',date:'Before June 19',note:'Order soon so it arrives in time for daycare graduation'},
+  {id:43,title:'Amari daycare graduation — coordinate attendance',project:'kids',cat:'personal',urgency:'later',date:'June 19'},
+  {id:45,title:'Book pelvic floor PT appointment',project:'admin',cat:'personal',urgency:'later',date:'When you have a moment',note:'You looked into hypertonia and psoas pain — worth following through on the PT referral'},
+  {id:47,title:'Renew your passport',project:'admin',cat:'personal',urgency:'later',date:'After Paris',note:'Still valid — renew proactively after the Paris trip. Can do online at travel.state.gov.'},
+  {id:48,title:"Renew Amari's passport",project:'admin',cat:'personal',urgency:'later',date:'No immediate trip',note:"Children's passports valid 5 years — check expiration. Requires in-person appointment at a passport acceptance facility; both parents typically need to be present."},
+  {id:49,title:"Renew Kyran's passport",project:'admin',cat:'personal',urgency:'later',date:'No immediate trip',note:"Children's passports valid 5 years — check expiration. Same in-person requirements as Amari's."},
+  {id:55,title:'Book hotel in Miami (near port, night before cruise)',project:'cruise',cat:'personal',urgency:'later',date:'Late July',note:'Book near the Port of Miami — easy Uber/Lyft from MIA. Night-before hotel strongly recommended.'},
+  {id:56,title:'Confirm airport → hotel → port transportation plan',project:'cruise',cat:'personal',urgency:'later',date:'Late July',note:'Miami is easy — Uber/Lyft works well. Just confirm plan once hotel is booked.'},
+  {id:57,title:"Check what's included on cruise vs. what to book in advance",project:'cruise',cat:'personal',urgency:'later',date:'Late July',note:"Excursions, dining reservations, kids' activities — worth reviewing before you sail"},
+  {id:60,title:'Add LinkedIn to email signature',project:'admin',cat:'work',urgency:'later',date:'When you have a moment'},
+];
+
+let currentView = 'schedule';
+let currentProject = null;
+
+function updateStats() {
+  const soon = TASKS.filter(t => t.urgency === 'soon').length;
+  document.getElementById('stat-soon').textContent = soon;
+  document.getElementById('stat-total').textContent = TASKS.length;
+}
+
+function taskCard(t) {
+  const urg = t.urgency === 'urgent' ? '<span class="badge badge-urgent">urgent</span>' : '';
+  const cat = t.cat === 'work' ? '<span class="badge badge-work">work</span>' : '<span class="badge badge-personal">personal</span>';
+  const dt = t.date ? `<span class="badge badge-date">${t.date}</span>` : '';
+  return `<div class="task-card">
+    <div class="task-num">#${t.id}</div>
+    <div class="task-body">
+      <div class="task-top"><span class="task-title">${t.title}</span><div class="badges">${urg}${cat}${dt}</div></div>
+      ${t.note ? `<div class="task-note">${t.note}</div>` : ''}
+    </div>
+  </div>`;
+}
+
+function sectionRule(label, count) {
+  return `<div class="section-rule">${label}<span class="section-count">${count}</span></div>`;
+}
+
+const SCHED_GROUPS = [
+  {label:'This week', filter: t => t.urgency==='soon' && (t.date||'').match(/Overdue|This week|ASAP|Follow-up|When you/)},
+  {label:'Before family pictures — Sat May 23', filter: t => (t.date||'').match(/5\/23|Before Sat 5\/23/)},
+  {label:'Before May 26 — blazer deadline', filter: t => (t.date||'').match(/May 26|Before May 26/)},
+  {label:'End of May', filter: t => t.urgency==='soon' && (t.date||'').match(/5\/30|May 30|Before Sat 5\/30|Before June 1/)},
+  {label:'June 1–11 · Boston + Paris', filter: t => t.urgency==='soon' && (t.date||'').match(/June 1|June 6|~June 1|~June 6/)},
+  {label:'June 12–18 · Home + Chicago', filter: t => t.urgency==='later' && (t.date||'').match(/June 12|June 15|June 16/)},
+  {label:'June 19+ · Wrapping up', filter: t => t.urgency==='later' && (t.date||'').match(/June 19|Father/)},
+  {label:'Late July · Cruise', filter: t => t.project==='cruise'},
+];
+
+function renderSchedule() {
+  let html = '', assigned = new Set();
+  SCHED_GROUPS.forEach(g => {
+    const items = TASKS.filter(t => g.filter(t) && !assigned.has(t.id));
+    items.forEach(t => assigned.add(t.id));
+    if (!items.length) return;
+    html += sectionRule(g.label, items.length);
+    items.forEach(t => html += taskCard(t));
+  });
+  const rest = TASKS.filter(t => !assigned.has(t.id));
+  if (rest.length) { html += sectionRule('Other', rest.length); rest.forEach(t => html += taskCard(t)); }
+  document.getElementById('view-schedule').innerHTML = html || '<p class="empty">All clear.</p>';
+}
+
+function renderProjects() {
+  if (currentProject) { renderProjectDetail(currentProject); return; }
+  let html = '<div class="project-grid">';
+  PROJECTS.forEach(p => {
+    const tasks = TASKS.filter(t => t.project === p.id);
+    const preview = tasks.slice(0, 3);
+    const more = tasks.length - preview.length;
+    html += `<div class="project-card" onclick="openProject('${p.id}')">
+      <div class="project-card-header">
+        <div><div class="project-name">${p.name}</div><div class="project-date">${p.date}</div></div>
+        <div class="project-dot" style="background:${p.color}"></div>
+      </div>
+      <div class="project-tasks-preview">
+        ${preview.map(t=>`<div class="project-task-row"><div class="mini-dot${t.urgency==='urgent'?' urgent':''}"></div>${t.title}</div>`).join('')}
+        ${more>0?`<div class="project-more">+${more} more tasks</div>`:''}
+        ${tasks.length===0?`<div class="project-more" style="color:var(--sage)">All clear ✓</div>`:''}
+      </div>
+      <div class="project-progress">
+        <span>${tasks.length} open</span>
+        <div class="progress-bar"><div class="progress-fill" style="width:100%"></div></div>
+      </div>
+    </div>`;
+  });
+  html += '</div>';
+  document.getElementById('view-projects').innerHTML = html;
+}
+
+function openProject(id) { currentProject = id; renderProjectDetail(id); }
+
+function renderProjectDetail(id) {
+  const p = PROJECTS.find(x => x.id === id);
+  const tasks = TASKS.filter(t => t.project === id);
+  const soon = tasks.filter(t => t.urgency === 'soon');
+  const later = tasks.filter(t => t.urgency === 'later');
+  let html = `<button class="back-btn" onclick="closeProject()">← All projects</button>
+  <div class="detail-title">${p.name}</div>
+  <div class="detail-meta">${p.date} · ${tasks.length} open</div>`;
+  if (soon.length) { html += sectionRule('Coming up', soon.length); soon.forEach(t => html += taskCard(t)); }
+  if (later.length) { html += sectionRule('Later', later.length); later.forEach(t => html += taskCard(t)); }
+  if (!tasks.length) html += '<p class="empty">Nothing open.</p>';
+  document.getElementById('view-projects').innerHTML = html;
+}
+
+function closeProject() { currentProject = null; renderProjects(); }
+
+function renderPriority() {
+  const soon = TASKS.filter(t => t.urgency === 'soon');
+  const later = TASKS.filter(t => t.urgency === 'later');
+  let html = '';
+  if (soon.length) { html+=`<div class="priority-section"><div class="priority-header ph-soon">Coming up <span class="pill-count">${soon.length}</span></div>`; soon.forEach(t=>html+=taskCard(t)); html+='</div>'; }
+  if (later.length) { html+=`<div class="priority-section"><div class="priority-header ph-later">Later <span class="pill-count">${later.length}</span></div>`; later.forEach(t=>html+=taskCard(t)); html+='</div>'; }
+  document.getElementById('view-priority').innerHTML = html || '<p class="empty">Nothing open.</p>';
+}
+
+function setView(view, btn) {
+  currentView = view; currentProject = null;
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  ['schedule','projects','priority'].forEach(v => {
+    document.getElementById('view-' + v).style.display = v === view ? 'block' : 'none';
+  });
+  if (view === 'schedule') renderSchedule();
+  else if (view === 'projects') renderProjects();
+  else if (view === 'priority') renderPriority();
+}
+
+updateStats();
+renderSchedule();
+</script>
+</body>
+</html>
