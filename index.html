@@ -33,6 +33,7 @@ body { font-family: 'Jost', sans-serif; background: var(--cream); color: var(--i
 .section-count { background: var(--cream-3); border-radius: 20px; padding: 1px 8px; font-size: 10px; color: var(--ink-3); letter-spacing: 0; text-transform: none; }
 .task-card { background: #fff; border: 1px solid var(--rule); border-radius: 6px; padding: 11px 14px; margin-bottom: 6px; display: flex; align-items: flex-start; gap: 11px; transition: box-shadow 0.15s; }
 .task-card:hover { box-shadow: 0 2px 8px rgba(44,33,24,0.06); border-color: var(--ink-3); }
+.task-num { font-size: 10px; color: var(--ink-3); font-weight: 400; letter-spacing: 0.03em; flex-shrink: 0; margin-top: 3px; min-width: 28px; }
 .task-body { flex: 1; min-width: 0; }
 .task-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
 .task-title { font-size: 14px; color: var(--ink); line-height: 1.45; flex: 1; font-weight: 400; }
@@ -118,9 +119,6 @@ const PROJECTS = [
 ];
 
 const TASKS = [
-  {id:9,title:'Submit Detroit per diem (overdue)',project:'pittsburgh',cat:'work',urgency:'soon',date:'Overdue',note:'Do this before Pittsburgh expense report'},
-  {id:10,title:'Submit Pittsburgh expense report',project:'pittsburgh',cat:'work',urgency:'soon',date:'This week',note:'Do while receipts are still fresh'},
-  {id:11,title:'Send reminder: deduct team dinners from per diem',project:'pittsburgh',cat:'work',urgency:'soon',date:'This week'},
   {id:17,title:'Schedule Pittsburgh debrief with facilitators',project:'pittsburgh',cat:'work',urgency:'soon',date:'This week'},
   {id:18,title:'Schedule Pittsburgh debrief with funders',project:'pittsburgh',cat:'work',urgency:'soon',date:'This week'},
   {id:51,title:'Update Migration Network contract to reflect Chief Devon ticket cost',project:'pittsburgh',cat:'work',urgency:'soon',date:'This week',note:'Ticket already purchased — contract needs to be amended to reflect actual spend'},
@@ -137,7 +135,7 @@ const TASKS = [
   {id:19,title:'Kids + Rafa haircuts before family pictures',project:'photos',cat:'personal',urgency:'soon',date:'Before Sat 5/23'},
   {id:20,title:'Plan and shop for family picture outfits',project:'photos',cat:'personal',urgency:'soon',date:'Before Sat 5/23',note:'Coordinate everyone — probably requires a shopping trip'},
   {id:21,title:'Find headshot outfit: professional but not stuffy',project:'photos',cat:'personal',urgency:'soon',date:'Before Sat 5/23',note:'Headshots same day as family pics on 5/23'},
-  {id:61,title:'Dry clean black blazer before Paris',project:'paris',cat:'personal',urgency:'soon',date:'Before May 26',note:"Drop off this week — you leave for Boston May 30 and Paris June 6"},
+  {id:61,title:'Dry clean black blazer before Paris',project:'paris',cat:'personal',urgency:'soon',date:'Before May 26',note:'Drop off this week — you leave for Boston May 30 and Paris June 6'},
   {id:22,title:'Buy + wrap gift for May 30 birthday party',project:'kids',cat:'personal',urgency:'soon',date:'Before Sat 5/30'},
   {id:23,title:'Make card for May 30 birthday party',project:'kids',cat:'personal',urgency:'soon',date:'Before Sat 5/30'},
   {id:24,title:'Pack for Boston: bed-wetting prep for Amari',project:'boston',cat:'personal',urgency:'soon',date:'Before Sat 5/30',note:"Waterproof mattress pad, extra PJs — also needed at friend's house later"},
@@ -163,133 +161,4 @@ const TASKS = [
   {id:41,title:'Order porch goose graduation outfit',project:'admin',cat:'personal',urgency:'later',date:'Before June 19',note:'Order soon so it arrives in time for daycare graduation'},
   {id:43,title:'Amari daycare graduation — coordinate attendance',project:'kids',cat:'personal',urgency:'later',date:'June 19'},
   {id:45,title:'Book pelvic floor PT appointment',project:'admin',cat:'personal',urgency:'later',date:'When you have a moment',note:'You looked into hypertonia and psoas pain — worth following through on the PT referral'},
-  {id:47,title:'Renew your passport',project:'admin',cat:'personal',urgency:'later',date:'After Paris',note:'Still valid — renew proactively after the Paris trip. Can do online at travel.state.gov.'},
-  {id:48,title:"Renew Amari's passport",project:'admin',cat:'personal',urgency:'later',date:'No immediate trip',note:"Children's passports valid 5 years — check expiration. Requires in-person appointment at a passport acceptance facility; both parents typically need to be present."},
-  {id:49,title:"Renew Kyran's passport",project:'admin',cat:'personal',urgency:'later',date:'No immediate trip',note:"Children's passports valid 5 years — check expiration. Same in-person requirements as Amari's."},
-  {id:55,title:'Book hotel in Miami (near port, night before cruise)',project:'cruise',cat:'personal',urgency:'later',date:'Late July',note:'Book near the Port of Miami — easy Uber/Lyft from MIA. Night-before hotel strongly recommended.'},
-  {id:56,title:'Confirm airport → hotel → port transportation plan',project:'cruise',cat:'personal',urgency:'later',date:'Late July',note:'Miami is easy — Uber/Lyft works well. Just confirm plan once hotel is booked.'},
-  {id:57,title:"Check what's included on cruise vs. what to book in advance",project:'cruise',cat:'personal',urgency:'later',date:'Late July',note:"Excursions, dining reservations, kids' activities — worth reviewing before you sail"},
-  {id:60,title:'Add LinkedIn to email signature',project:'admin',cat:'work',urgency:'later',date:'When you have a moment'},
-];
-
-let currentView = 'schedule';
-let currentProject = null;
-
-function updateStats() {
-  const soon = TASKS.filter(t => t.urgency === 'soon').length;
-  document.getElementById('stat-soon').textContent = soon;
-  document.getElementById('stat-total').textContent = TASKS.length;
-}
-
-function taskCard(t) {
-  const urg = t.urgency === 'urgent' ? '<span class="badge badge-urgent">urgent</span>' : '';
-  const cat = t.cat === 'work' ? '<span class="badge badge-work">work</span>' : '<span class="badge badge-personal">personal</span>';
-  const dt = t.date ? `<span class="badge badge-date">${t.date}</span>` : '';
-  return `<div class="task-card">
-    <div class="task-body">
-      <div class="task-top"><span class="task-title">${t.title}</span><div class="badges">${urg}${cat}${dt}</div></div>
-      ${t.note ? `<div class="task-note">${t.note}</div>` : ''}
-    </div>
-  </div>`;
-}
-
-function sectionRule(label, count) {
-  return `<div class="section-rule">${label}<span class="section-count">${count}</span></div>`;
-}
-
-const SCHED_GROUPS = [
-  {label:'This week', filter: t => t.urgency==='soon' && (t.date||'').match(/Overdue|This week|ASAP|Follow-up|When you/)},
-  {label:'Before family pictures — Sat May 23', filter: t => (t.date||'').match(/5\/23|Before Sat 5\/23/)},
-  {label:'Before May 26 — blazer deadline', filter: t => (t.date||'').match(/May 26|Before May 26/)},
-  {label:'End of May', filter: t => t.urgency==='soon' && (t.date||'').match(/5\/30|May 30|Before Sat 5\/30|Before June 1/)},
-  {label:'June 1–11 · Boston + Paris', filter: t => t.urgency==='soon' && (t.date||'').match(/June 1|June 6|~June 1|~June 6/)},
-  {label:'June 12–18 · Home + Chicago', filter: t => t.urgency==='later' && (t.date||'').match(/June 12|June 15|June 16/)},
-  {label:'June 19+ · Wrapping up', filter: t => t.urgency==='later' && (t.date||'').match(/June 19|Father/)},
-  {label:'Late July · Cruise', filter: t => t.project==='cruise'},
-];
-
-function renderSchedule() {
-  let html = '', assigned = new Set();
-  SCHED_GROUPS.forEach(g => {
-    const items = TASKS.filter(t => g.filter(t) && !assigned.has(t.id));
-    items.forEach(t => assigned.add(t.id));
-    if (!items.length) return;
-    html += sectionRule(g.label, items.length);
-    items.forEach(t => html += taskCard(t));
-  });
-  const rest = TASKS.filter(t => !assigned.has(t.id));
-  if (rest.length) { html += sectionRule('Other', rest.length); rest.forEach(t => html += taskCard(t)); }
-  document.getElementById('view-schedule').innerHTML = html || '<p class="empty">All clear.</p>';
-}
-
-function renderProjects() {
-  if (currentProject) { renderProjectDetail(currentProject); return; }
-  let html = '<div class="project-grid">';
-  PROJECTS.forEach(p => {
-    const tasks = TASKS.filter(t => t.project === p.id);
-    const preview = tasks.slice(0, 3);
-    const more = tasks.length - preview.length;
-    html += `<div class="project-card" onclick="openProject('${p.id}')">
-      <div class="project-card-header">
-        <div><div class="project-name">${p.name}</div><div class="project-date">${p.date}</div></div>
-        <div class="project-dot" style="background:${p.color}"></div>
-      </div>
-      <div class="project-tasks-preview">
-        ${preview.map(t=>`<div class="project-task-row"><div class="mini-dot${t.urgency==='urgent'?' urgent':''}"></div>${t.title}</div>`).join('')}
-        ${more>0?`<div class="project-more">+${more} more tasks</div>`:''}
-        ${tasks.length===0?`<div class="project-more" style="color:var(--sage)">All clear ✓</div>`:''}
-      </div>
-      <div class="project-progress">
-        <span>${tasks.length} open</span>
-        <div class="progress-bar"><div class="progress-fill" style="width:100%"></div></div>
-      </div>
-    </div>`;
-  });
-  html += '</div>';
-  document.getElementById('view-projects').innerHTML = html;
-}
-
-function openProject(id) { currentProject = id; renderProjectDetail(id); }
-
-function renderProjectDetail(id) {
-  const p = PROJECTS.find(x => x.id === id);
-  const tasks = TASKS.filter(t => t.project === id);
-  const soon = tasks.filter(t => t.urgency === 'soon');
-  const later = tasks.filter(t => t.urgency === 'later');
-  let html = `<button class="back-btn" onclick="closeProject()">← All projects</button>
-  <div class="detail-title">${p.name}</div>
-  <div class="detail-meta">${p.date} · ${tasks.length} open</div>`;
-  if (soon.length) { html += sectionRule('Coming up', soon.length); soon.forEach(t => html += taskCard(t)); }
-  if (later.length) { html += sectionRule('Later', later.length); later.forEach(t => html += taskCard(t)); }
-  if (!tasks.length) html += '<p class="empty">Nothing open.</p>';
-  document.getElementById('view-projects').innerHTML = html;
-}
-
-function closeProject() { currentProject = null; renderProjects(); }
-
-function renderPriority() {
-  const soon = TASKS.filter(t => t.urgency === 'soon');
-  const later = TASKS.filter(t => t.urgency === 'later');
-  let html = '';
-  if (soon.length) { html+=`<div class="priority-section"><div class="priority-header ph-soon">Coming up <span class="pill-count">${soon.length}</span></div>`; soon.forEach(t=>html+=taskCard(t)); html+='</div>'; }
-  if (later.length) { html+=`<div class="priority-section"><div class="priority-header ph-later">Later <span class="pill-count">${later.length}</span></div>`; later.forEach(t=>html+=taskCard(t)); html+='</div>'; }
-  document.getElementById('view-priority').innerHTML = html || '<p class="empty">Nothing open.</p>';
-}
-
-function setView(view, btn) {
-  currentView = view; currentProject = null;
-  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  ['schedule','projects','priority'].forEach(v => {
-    document.getElementById('view-' + v).style.display = v === view ? 'block' : 'none';
-  });
-  if (view === 'schedule') renderSchedule();
-  else if (view === 'projects') renderProjects();
-  else if (view === 'priority') renderPriority();
-}
-
-updateStats();
-renderSchedule();
-</script>
-</body>
-</html>
+  {id:47,title:'Renew your passport',project:'admin',cat:'personal',urgency:'later',date:'After Paris',note:'Still valid — renew proactively aft
