@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Stephanie's Command Center</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --ink: #1c1c1e;
+  --ink-2: #48484a;
+  --ink-3: #8e8e93;
+  --paper: #faf9f6;
+  --paper-2: #f2f0eb;
+  --paper-3: #e8e5de;
+  --rule: #dedad2;
+  --accent: #48535b;
+  --accent-light: #e8eced;
+  --urgent-bg: #fdf0ed;
+  --urgent-text: #7a2e1a;
+  --urgent-border: #f0c4b4;
+  --work-bg: #edf3fb;
+  --work-text: #1a4a7a;
+  --work-border: #c0d8f5;
+  --personal-bg: #f0eefc;
+  --personal-text: #3a2a7a;
+  --personal-border: #cfc9f5;
+  --done-bg: #edf7ee;
+  --done-text: #1a5c1a;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--paper);
+  color: var(--ink);
+  min-height: 100vh;
+}
+.header {
+  padding: 2rem 2rem 1rem;
+  border-bottom: 1px solid var(--rule);
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+.header-left h1 {
+  font-family: 'DM Serif Display', serif;
+  font-size: 28px;
+  color: var(--ink);
+  line-height: 1.1;
+}
+.header-left p {
+  font-size: 13px;
+  color: var(--ink-3);
+  margin-top: 3px;
+  font-weight: 300;
+}
+.stats {
+  display: flex;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+}
+.stat {
+  text-align: right;
+}
+.stat-num {
+  font-family: 'DM Serif Display', serif;
+  font-size: 22px;
+  color: var(--ink);
+  line-height: 1;
+}
+.stat-label {
+  font-size: 11px;
+  color: var(--ink-3);
+  margin-top: 2px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.nav {
+  display: flex;
+  gap: 0;
+  padding: 0 2rem;
+  border-bottom: 1px solid var(--rule);
+  overflow-x: auto;
+}
+.nav-btn {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--ink-3);
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  padding: 12px 16px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.15s;
+}
+.nav-btn:hover { color: var(--ink); }
+.nav-btn.active {
+  color: var(--ink);
+  border-bottom-color: var(--accent);
+  font-weight: 500;
+}
+.content { padding: 1.5rem 2rem; max-width: 900px; }
+
+/* SCHEDULE VIEW */
+.timeline-group { margin-bottom: 2rem; }
+.timeline-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--ink-3);
+  font-weight: 500;
+  margin-bottom: 10px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--rule);
+}
+
+/* PROJECT VIEW */
+.project-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 1rem;
+}
+.project-card {
+  background: #fff;
+  border: 1px solid var(--rule);
+  border-radius: 12px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: box-shadow 0.15s, transform 0.15s;
+}
+.project-card:hover {
+  box-shadow: 0 4px 16px rgba(0,0,0,0.07);
+  transform: translateY(-1px);
+}
+.project-card-header {
+  padding: 14px 16px 10px;
+  border-bottom: 1px solid var(--rule);
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+}
+.project-name {
+  font-family: 'DM Serif Display', serif;
+  font-size: 16px;
+  color: var(--ink);
+  line-height: 1.3;
+}
+.project-date {
+  font-size: 11px;
+  color: var(--ink-3);
+  white-space: nowrap;
+  margin-top: 3px;
+}
+.project-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  margin-top: 4px;
+}
+.project-tasks-preview {
+  padding: 10px 16px 14px;
+}
+.project-task-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 7px;
+  padding: 3px 0;
+  font-size: 12px;
+  color: var(--ink-2);
+  line-height: 1.35;
+}
+.mini-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--rule);
+  flex-shrink: 0;
+  margin-top: 5px;
+}
+.mini-dot.urgent { background: #d4522a; }
+.project-more {
+  font-size: 11px;
+  color: var(--ink-3);
+  margin-top: 6px;
+  padding-top: 6px;
+  border-top: 1px solid var(--paper-2);
+}
+.project-progress {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: var(--paper-2);
+  font-size: 11px;
+  color: var(--ink-3);
+}
+.progress-bar {
+  flex: 1;
+  height: 3px;
+  background: var(--rule);
+  border-radius: 2px;
+  overflow: hidden;
+}
+.progress-fill {
+  height: 100%;
+  background: var(--accent);
+  border-radius: 2px;
+  transition: width 0.3s;
+}
+
+/* PROJECT DETAIL */
+.project-detail { display: none; }
+.project-detail.active { display: block; }
+.back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--ink-3);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  margin-bottom: 1.25rem;
+  font-family: 'DM Sans', sans-serif;
+}
+.back-btn:hover { color: var(--ink); }
+.detail-header {
+  margin-bottom: 1.25rem;
+}
+.detail-title {
+  font-family: 'DM Serif Display', serif;
+  font-size: 24px;
+  color: var(--ink);
+}
+.detail-meta {
+  font-size: 13px;
+  color: var(--ink-3);
+  margin-top: 4px;
+}
+
+/* TASK CARDS */
+.task-card {
+  background: #fff;
+  border: 1px solid var(--rule);
+  border-radius: 8px;
+  padding: 10px 14px;
+  margin-bottom: 6px;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  cursor: pointer;
+  transition: border-color 0.15s;
+}
+.task-card:hover { border-color: #bbb; }
+.task-num { font-size: 10px; color: var(--ink-3); font-weight: 400; letter-spacing: 0.03em; flex-shrink: 0; margin-top: 3px; min-width: 28px; }
+.task-card.done { opacity: 0.38; }
+.task-card.done .task-title { text-decoration: line-through; }
+.checkbox {
+  width: 17px; height: 17px;
+  border: 1.5px solid var(--rule);
+  border-radius: 4px;
+  flex-shrink: 0;
+  margin-top: 2px;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.15s;
+}
+.task-card.done .checkbox { background: var(--accent); border-color: var(--accent); }
+.task-card.done .checkbox::after {
+  content: '';
+  display: block;
+  width: 8px; height: 5px;
+  border-left: 2px solid #fff;
+  border-bottom: 2px solid #fff;
+  transform: rotate(-45deg) translateY(-1px);
+}
+.task-body { flex: 1; min-width: 0; }
+.task-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.task-title { font-size: 14px; color: var(--ink); line-height: 1.4; flex: 1; }
+.badges { display: flex; gap: 4px; flex-wrap: wrap; flex-shrink: 0; }
+.badge {
+  font-size: 11px; padding: 2px 8px;
+  border-radius: 20px; white-space: nowrap; font-weight: 400;
+}
+.badge-date { background: var(--paper-2); color: var(--ink-3); border: 1px solid var(--rule); }
+.badge-urgent { background: var(--urgent-bg); color: var(--urgent-text); border: 1px solid var(--urgent-border); }
+.badge-work { background: var(--work-bg); color: var(--work-text); border: 1px solid var(--work-border); }
+.badge-personal { background: var(--personal-bg); color: var(--personal-text); border: 1px solid var(--personal-border); }
+.task-note { font-size: 12px; color: var(--ink-3); margin-top: 3px; line-height: 1.4; font-weight: 300; }
+
+.section-rule {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--ink-3);
+  font-weight: 500;
+  margin: 1.5rem 0 10px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--rule);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.section-count {
+  background: var(--paper-2);
+  border-radius: 20px;
+  padding: 1px 8px;
+  font-size: 11px;
+  color: var(--ink-3);
+  letter-spacing: 0;
+  text-transform: none;
+}
+.empty { font-size: 13px; color: var(--ink-3); padding: 1rem 0; text-align: center; font-style: italic; }
+
+/* PRIORITY VIEW */
+.priority-section { margin-bottom: 1.75rem; }
+.priority-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.ph-urgent { background: var(--urgent-bg); color: var(--urgent-text); }
+.ph-soon { background: var(--work-bg); color: var(--work-text); }
+.ph-later { background: var(--paper-2); color: var(--ink-3); }
+
+.pill-count {
+  background: rgba(0,0,0,0.08);
+  border-radius: 20px;
+  padding: 1px 7px;
+  font-size: 11px;
+}
+
+/* PROJECT COLORS */
+.pc-pittsburgh { background: #d4522a; }
+.pc-housing { background: #185FA5; }
+.pc-boston { background: #3B6D11; }
+.pc-paris { background: #854F0B; }
+.pc-photos { background: #993556; }
+.pc-kids { background: #533AB7; }
+.pc-admin { background: #48535b; }
+.pc-chicago { background: #0F6E56; }
+.pc-cruise { background: #0771A6; }
+
+@media (max-width: 600px) {
+  .header { padding: 1.25rem 1rem 0.75rem; }
+  .nav { padding: 0 1rem; }
+  .content { padding: 1rem; }
+  .project-grid { grid-template-columns: 1fr; }
+  .stats { gap: 1rem; }
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-left">
+    <h1>Command Center</h1>
+    <p id="header-sub">Your life, organized.</p>
+  </div>
+  <div class="stats">
+    <div class="stat">
+      <div class="stat-num" id="stat-urgent">—</div>
+      <div class="stat-label">This weekend</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num" id="stat-total">—</div>
+      <div class="stat-label">Total open</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num" id="stat-done">—</div>
+      <div class="stat-label">Done</div>
+    </div>
+  </div>
+</div>
+
+<div class="nav">
+  <button class="nav-btn active" onclick="setView('schedule', this)">Schedule</button>
+  <button class="nav-btn" onclick="setView('projects', this)">Projects</button>
+  <button class="nav-btn" onclick="setView('priority', this)">Priority</button>
+  <button class="nav-btn" onclick="setView('completed', this)">Completed</button>
+</div>
+
+<div class="content">
+  <div id="view-schedule"></div>
+  <div id="view-projects" style="display:none"></div>
+  <div id="view-priority" style="display:none"></div>
+  <div id="view-completed" style="display:none"></div>
+</div>
+
+<script>
+const PROJECTS = [
+  { id:'pittsburgh', name:'Pittsburgh / Resilient Together', date:'Debrief & wrap-up', dot:'pc-pittsburgh', cat:'work' },
+  { id:'housing', name:'Housing Innovation Summit', date:'May 20–22 · Charlotte', dot:'pc-housing', cat:'work' },
+  { id:'boston', name:'Boston / June 1 Retreat', date:'May 30 – June 4', dot:'pc-boston', cat:'work' },
+  { id:'paris', name:'Paris Trip', date:'June 6–11', dot:'pc-paris', cat:'work' },
+  { id:'photos', name:'Family Pictures', date:'Saturday, May 23', dot:'pc-photos', cat:'personal' },
+  { id:'kids', name:'Kids & Family', date:'Ongoing', dot:'pc-kids', cat:'personal' },
+  { id:'admin', name:'Personal Admin', date:'Ongoing', dot:'pc-admin', cat:'personal' },
+  { id:'chicago', name:'Chicago Trip', date:'June 15–18', dot:'pc-chicago', cat:'work' },
+  { id:'cruise', name:'Miami Cruise', date:'Late July', dot:'pc-cruise', cat:'personal' },
+];
+
+const TASKS = [
+  // PITTSBURGH
+  { id:17, title:'Schedule Pittsburgh debrief with facilitators', project:'pittsburgh', cat:'work', urgency:'soon', date:'This week' },
+  // BUILDING FOR THE FUTURE
+  { id:12, title:'Review Building for the Future payment timelines', project:'admin', cat:'work', urgency:'soon', date:'This week', note:'Rush any payments that need to fit current fiscal year' },
+  { id:13, title:'Email sponsored project summaries + contact info to teams', project:'admin', cat:'work', urgency:'soon', date:'This week', note:'All other Lincoln-sponsored projects' },
+  // MAY 30 BIRTHDAY
+  { id:22, title:'Buy + wrap gift for Ivy & Mila\'s birthday party', project:'kids', cat:'personal', urgency:'soon', date:'Before Sat 5/30' },
+  { id:23, title:'Make card for Ivy & Mila\'s birthday party', project:'kids', cat:'personal', urgency:'soon', date:'Before Sat 5/30' },
+  // BOSTON
+  { id:24, title:'Pack for Boston: bed-wetting prep for Amari', project:'boston', cat:'personal', urgency:'soon', date:'Before Sat 5/30', note:'Waterproof mattress pad, extra PJs — also needed at friend\'s house later' },
+  { id:25, title:'Gather and confirm Boston museum passes', project:'boston', cat:'personal', urgency:'soon', date:'Before Sat 5/30', note:'Already have them — just organize and verify which ones' },
+  { id:26, title:'Organize June 1 retreat: catering', project:'boston', cat:'work', urgency:'soon', date:'Before June 1' },
+  { id:27, title:'Organize June 1 retreat: pre-reads', project:'boston', cat:'work', urgency:'soon', date:'Before June 1' },
+  { id:28, title:'Organize June 1 retreat: remaining logistics', project:'boston', cat:'work', urgency:'soon', date:'Before June 1', note:'Agenda is with Solomon — follow his lead, then fill in logistics' },
+  { id:29, title:"Decide: bring Amari to Devorah's gravesite in Cambridge?", project:'boston', cat:'personal', urgency:'soon', date:'~June 1–4', note:'Her birthday falls during the trip — option to paint rocks + visit, or skip the death conversation for now' },
+  { id:30, title:"Paint rocks with Amari for Devorah's gravesite", project:'boston', cat:'personal', urgency:'soon', date:'~June 1–4', note:'Contingent on decision above' },
+  { id:31, title:"Reach out to the Hive about Thea's surgery gift", project:'admin', cat:'personal', urgency:'soon', date:'~June 1 week', note:'Thea has surgery that week — start coordinating group gift' },
+  // PARIS
+  { id:44, title:'Verify Verizon TravelPass is active on your line before Paris', project:'paris', cat:'personal', urgency:'soon', date:'Before June 6', note:'Now $12/day internationally. Check My Verizon app — if not on your line, ask your stepdad to add it or grant you Account Manager access' },
+  { id:45, title:'Book pelvic floor PT appointment', project:'admin', cat:'personal', urgency:'later', date:'When you have a moment', note:'You looked into hypertonia and psoas pain — worth following through on the PT referral' },
+  { id:50, title:'Schedule 1:1 with Swati (Equity & Opportunity team)', project:'admin', cat:'work', urgency:'soon', date:'This week', note:'She is open to it — just needs a time on the calendar' },
+  { id:53, title:'Brief Libertad on TFN', project:'admin', cat:'work', urgency:'soon', date:'Follow-up from Detroit/APA trip' },
+  { id:54, title:'Follow up with Libertad on external partners, branding + logos', project:'admin', cat:'work', urgency:'soon', date:'Follow-up from Detroit/APA trip', note:'Meeting on a Monday — naming, logos, branding discussion' },
+  { id:48, title:"Renew Amari's passport", project:'admin', cat:'personal', urgency:'later', date:'No immediate trip', note:"Children's passports valid 5 years — check expiration. Requires in-person appointment at a passport acceptance facility; both parents typically need to be present." },
+  { id:49, title:"Get Kyran's first passport", project:'admin', cat:'personal', urgency:'later', date:'No immediate trip', note:"First passport — requires in-person appointment at a passport acceptance facility; both parents typically need to be present." },
+  { id:32, title:'Paris: request early check-in at hotel (overnight flight)', project:'paris', cat:'work', urgency:'soon', date:'ASAP', note:'Hotel is far from meeting office — early check-in is critical' },
+  { id:34, title:'Paris: overlay new agenda with team logistics', project:'paris', cat:'work', urgency:'soon', date:'Before June 6' },
+  { id:35, title:'Paris: prepare bios + session materials', project:'paris', cat:'work', urgency:'soon', date:'Before June 6' },
+  { id:36, title:'Paris: organize team + larger group dinners', project:'paris', cat:'work', urgency:'soon', date:'Before June 6', note:'Some Lincoln team only, others with broader group' },
+  { id:37, title:'Plan something for wedding anniversary (you\'ll be in Paris)', project:'paris', cat:'personal', urgency:'soon', date:'~June 6–11', note:'Acknowledge it for Rafa — plan a before/after celebration or send something from Paris' },
+  // POST-PARIS
+  { id:38, title:'Look up Discovery Place Lego exhibit + parking/traffic', project:'kids', cat:'personal', urgency:'later', date:'June 12', note:'Never been — plan logistics in advance' },
+  // CHICAGO
+  { id:39, title:'Prep for Chicago trip', project:'chicago', cat:'work', urgency:'later', date:'June 15–18', note:"Solomon's birthday is June 16 while you're there" },
+  // PERSONAL ADMIN
+  { id:40, title:"Reschedule Amari's ENT appointment", project:'admin', cat:'personal', urgency:'later', date:'June 16 → TBD', note:"He'll be with your mom for summer — she'll prefer you take him; move to a date you can attend" },
+  { id:42, title:'Plan Father\'s Day', project:'admin', cat:'personal', urgency:'later', date:'~June 15 weekend', note:"Nothing planned — you'll be in Chicago, so organize something for before or after" },
+  { id:43, title:'Amari daycare graduation — coordinate attendance', project:'kids', cat:'personal', urgency:'later', date:'June 19' },
+  // CRUISE
+  { id:55, title:'Book hotel in Miami (near port, night before cruise)', project:'cruise', cat:'personal', urgency:'later', date:'Late July', note:'Book near the Port of Miami — easy Uber/Lyft from MIA. Night-before hotel strongly recommended.' },
+  { id:56, title:'Confirm airport → hotel → port transportation plan', project:'cruise', cat:'personal', urgency:'later', date:'Late July', note:'Miami is easy — Uber/Lyft works well. Just confirm plan once hotel is booked.' },
+  { id:57, title:'Check what\'s included on cruise vs. what to book in advance', project:'cruise', cat:'personal', urgency:'later', date:'Late July', note:'Excursions, dining reservations, kids\' activities — worth reviewing before you sail' },
+  // BILLS / ADMIN
+  { id:58, title:'Set up autopay for remaining bills', project:'admin', cat:'personal', urgency:'soon', date:'This week', note:'Review your bill spreadsheet — set fixed bills to full autopay, credit cards to at least minimum payment to protect credit and avoid late fees' },
+  { id:59, title:'Find a new therapist', project:'admin', cat:'personal', urgency:'soon', date:'When you have a moment', note:'Check insurance coverage first to narrow the list' },
+  { id:60, title:'Add LinkedIn to email signature', project:'admin', cat:'work', urgency:'later', date:'When you have a moment' },
+  { id:61, title:'Dry clean black blazer', project:'admin', cat:'personal', urgency:'urgent', date:'Before May 26', note:'Needs to be done before Paris prep kicks in — drop off ASAP' },
+  { id:64, title:'Fix Monday.com flow for FE contract emails routing by PoC field', project:'admin', cat:'work', urgency:'soon', date:'This week' },
+  { id:65, title:'Update retreat budget with travel costs', project:'boston', cat:'work', urgency:'soon', date:'Before June 1' },
+  { id:66, title:'Update Paris budget with travel costs', project:'paris', cat:'work', urgency:'soon', date:'Before June 6' },
+  { id:67, title:"Get a card for Solomon for the retreat", project:'boston', cat:'work', urgency:'soon', date:'Before June 1' },
+  { id:68, title:"Send Amari's milestone photos for TLE graduation slideshow", project:'kids', cat:'personal', urgency:'soon', date:'~June 6–9', note:'One photo per year of his life. Email to Mooresville1@tlechildcare.com. Deadline falls during Paris — send before you leave June 6 or remember to do it from there.' },
+];
+
+const done = new Set();
+let currentView = 'schedule';
+let currentProject = null;
+
+function toggleTask(id) {
+  done.has(id) ? done.delete(id) : done.add(id);
+  updateStats();
+  renderCurrentView();
+}
+
+function updateStats() {
+  const open = TASKS.filter(t => !done.has(t.id));
+  document.getElementById('stat-urgent').textContent = open.filter(t => t.urgency === 'urgent').length;
+  document.getElementById('stat-total').textContent = open.length;
+  document.getElementById('stat-done').textContent = done.size;
+}
+
+function taskCard(t) {
+  const isDone = done.has(t.id);
+  const proj = PROJECTS.find(p => p.id === t.project);
+  const urgBadge = t.urgency === 'urgent' ? `<span class="badge badge-urgent">urgent</span>` : '';
+  const catBadge = t.cat === 'work' ? `<span class="badge badge-work">work</span>` : `<span class="badge badge-personal">personal</span>`;
+  const dateBadge = t.date ? `<span class="badge badge-date">${t.date}</span>` : '';
+  return `<div class="task-card${isDone?' done':''}" onclick="toggleTask(${t.id})">
+    <div class="task-num">#${t.id}</div>
+    <div class="task-body">
+      <div class="task-top">
+        <span class="task-title">${t.title}</span>
+        <div class="badges">${urgBadge}${catBadge}${dateBadge}</div>
+      </div>
+      ${t.note ? `<div class="task-note">${t.note}</div>` : ''}
+    </div>
+  </div>`;
+}
+
+function sectionRule(label, count) {
+  return `<div class="section-rule">${label}<span class="section-count">${count}</span></div>`;
+}
+
+// SCHEDULE VIEW
+const SCHEDULE_GROUPS = [
+  { label:'This weekend — needs attention now', filter: t => t.urgency === 'urgent' },
+  { label:'Next up — week of May 19', filter: t => t.urgency === 'soon' && (t.date||'').match(/20|21|22|23|Before Tue|Overdue|This week|ASAP/) },
+  { label:'End of May', filter: t => t.urgency === 'soon' && (t.date||'').match(/5\/30|May 30|Before Sat 5\/30|Before June 1/) },
+  { label:'June 1–11 · Boston + Paris', filter: t => t.urgency === 'soon' && (t.date||'').match(/June 1|June 6|~June 1|~June 6/) },
+  { label:'June 12–18 · Home + Chicago', filter: t => t.urgency === 'later' && (t.date||'').match(/June 12|June 15|June 16/) },
+  { label:'June 19+ · Wrapping up', filter: t => t.urgency === 'later' && (t.date||'').match(/June 19|June 21|Father/) },
+  { label:'Late July · Cruise', filter: t => t.project === 'cruise' },
+];
+
+function renderSchedule() {
+  const open = TASKS.filter(t => !done.has(t.id));
+  let html = '';
+  let assigned = new Set();
+  SCHEDULE_GROUPS.forEach(g => {
+    const items = open.filter(t => g.filter(t) && !assigned.has(t.id));
+    items.forEach(t => assigned.add(t.id));
+    if (!items.length) return;
+    html += sectionRule(g.label, items.length);
+    items.forEach(t => html += taskCard(t));
+  });
+  const rest = open.filter(t => !assigned.has(t.id));
+  if (rest.length) {
+    html += sectionRule('Other', rest.length);
+    rest.forEach(t => html += taskCard(t));
+  }
+  if (!html) html = '<p class="empty">Everything\'s done. Enjoy the moment.</p>';
+  document.getElementById('view-schedule').innerHTML = html;
+}
+
+// PROJECTS VIEW
+function renderProjects() {
+  if (currentProject) {
+    renderProjectDetail(currentProject);
+    return;
+  }
+  const el = document.getElementById('view-projects');
+  let html = '<div class="project-grid">';
+  PROJECTS.forEach(p => {
+    const allTasks = TASKS.filter(t => t.project === p.id);
+    const openTasks = allTasks.filter(t => !done.has(t.id));
+    const doneTasks = allTasks.filter(t => done.has(t.id));
+    const pct = allTasks.length ? Math.round(doneTasks.length / allTasks.length * 100) : 0;
+    const preview = openTasks.slice(0, 3);
+    const more = openTasks.length - preview.length;
+    html += `<div class="project-card" onclick="openProject('${p.id}')">
+      <div class="project-card-header">
+        <div>
+          <div class="project-name">${p.name}</div>
+          <div class="project-date">${p.date}</div>
+        </div>
+        <div class="project-dot ${p.dot}"></div>
+      </div>
+      <div class="project-tasks-preview">
+        ${preview.map(t => `<div class="project-task-row"><div class="mini-dot${t.urgency==='urgent'?' urgent':''}"></div>${t.title}</div>`).join('')}
+        ${more > 0 ? `<div class="project-more">+${more} more tasks</div>` : ''}
+        ${openTasks.length === 0 ? `<div class="project-more" style="color:#1a5c1a">All done ✓</div>` : ''}
+      </div>
+      <div class="project-progress">
+        <span>${pct}% done</span>
+        <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
+        <span>${openTasks.length} left</span>
+      </div>
+    </div>`;
+  });
+  html += '</div>';
+  el.innerHTML = html;
+}
+
+function openProject(id) {
+  currentProject = id;
+  renderProjectDetail(id);
+}
+
+function renderProjectDetail(id) {
+  const p = PROJECTS.find(x => x.id === id);
+  const allTasks = TASKS.filter(t => t.project === id);
+  const openTasks = allTasks.filter(t => !done.has(t.id));
+  const doneTasks = allTasks.filter(t => done.has(t.id));
+  const urgent = openTasks.filter(t => t.urgency === 'urgent');
+  const soon = openTasks.filter(t => t.urgency === 'soon');
+  const later = openTasks.filter(t => t.urgency === 'later');
+  let html = `<button class="back-btn" onclick="closeProject()">← All projects</button>
+  <div class="detail-header">
+    <div class="detail-title">${p.name}</div>
+    <div class="detail-meta">${p.date} · ${openTasks.length} open · ${doneTasks.length} done</div>
+  </div>`;
+  if (urgent.length) { html += sectionRule('Urgent', urgent.length); urgent.forEach(t => html += taskCard(t)); }
+  if (soon.length) { html += sectionRule('Coming up', soon.length); soon.forEach(t => html += taskCard(t)); }
+  if (later.length) { html += sectionRule('Later', later.length); later.forEach(t => html += taskCard(t)); }
+  if (doneTasks.length) { html += sectionRule('Done', doneTasks.length); doneTasks.forEach(t => html += taskCard(t)); }
+  if (!openTasks.length && !doneTasks.length) html += '<p class="empty">No tasks yet.</p>';
+  document.getElementById('view-projects').innerHTML = html;
+}
+
+function closeProject() {
+  currentProject = null;
+  renderProjects();
+}
+
+// PRIORITY VIEW
+function renderPriority() {
+  const open = TASKS.filter(t => !done.has(t.id));
+  const urgent = open.filter(t => t.urgency === 'urgent');
+  const soon = open.filter(t => t.urgency === 'soon');
+  const later = open.filter(t => t.urgency === 'later');
+  let html = '';
+  if (urgent.length) {
+    html += `<div class="priority-section"><div class="priority-header ph-urgent">This weekend <span class="pill-count">${urgent.length}</span></div>`;
+    urgent.forEach(t => html += taskCard(t));
+    html += '</div>';
+  }
+  if (soon.length) {
+    html += `<div class="priority-section"><div class="priority-header ph-soon">Coming up <span class="pill-count">${soon.length}</span></div>`;
+    soon.forEach(t => html += taskCard(t));
+    html += '</div>';
+  }
+  if (later.length) {
+    html += `<div class="priority-section"><div class="priority-header ph-later">Later <span class="pill-count">${later.length}</span></div>`;
+    later.forEach(t => html += taskCard(t));
+    html += '</div>';
+  }
+  if (!html) html = '<p class="empty">Nothing open right now.</p>';
+  document.getElementById('view-priority').innerHTML = html;
+}
+
+// COMPLETED VIEW
+function renderCompleted() {
+  const doneItems = TASKS.filter(t => done.has(t.id));
+  let html = '';
+  if (!doneItems.length) {
+    html = '<p class="empty">Nothing checked off yet — go get something done.</p>';
+  } else {
+    html += sectionRule('Completed', doneItems.length);
+    doneItems.forEach(t => html += taskCard(t));
+  }
+  document.getElementById('view-completed').innerHTML = html;
+}
+
+function setView(view, btn) {
+  currentView = view;
+  currentProject = null;
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  ['schedule','projects','priority','completed'].forEach(v => {
+    document.getElementById('view-' + v).style.display = v === view ? 'block' : 'none';
+  });
+  renderCurrentView();
+}
+
+function renderCurrentView() {
+  if (currentView === 'schedule') renderSchedule();
+  else if (currentView === 'projects') renderProjects();
+  else if (currentView === 'priority') renderPriority();
+  else if (currentView === 'completed') renderCompleted();
+}
+
+// Init
+updateStats();
+renderSchedule();
+</script>
+</body>
+</html>
